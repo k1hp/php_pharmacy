@@ -1,100 +1,73 @@
-# ДИРЕКТОРИИ
-/vendor/
+# ИДЕ и редакторы
+/.idea/
+/.vscode/
+/.vs/
+*.swp
+*.swo
+*~
+
+# ОС
+.DS_Store
+Thumbs.db
+
+# Yii2 сгенерированные файлы
 /runtime/*
 !/runtime/.gitkeep
 /web/assets/*
 !/web/assets/.gitkeep
+/vendor/
 
-# КОНФИГУРАЦИОННЫЕ ФАЙЛЫ (чувствительные данные)
-/config/params-local.php
-/config/web-local.php
-/config/console-local.php
-.env
-.env.local
-.env.*.local
-*.local.php
-
-# IDE
-.idea/
-.vscode/
-*.swp
-*.swo
-*.swn
-*.bak
-.DS_Store
-Thumbs.db
-
-# COMPOSER
-composer.phar
-composer.lock
+# Composer
 /composer.lock
+/vendor/
 
-# TESTS
-/tests/_output/*
-/tests/_support/_generated/*
-.codeception
-.codeception.result.cache
-/tests/*.sqlite
-
-# ПАКЕТНЫЕ МЕНЕДЖЕРЫ
-/node_modules/
-/bower_components/
-/npm-debug.log
-/yarn-error.log
-
-# ДОКЕР
-docker-compose.override.yml
-.dockerignore
-
-# ВАГРАНТ
-.vagrant/
-vagrant-local.yml
-
-# ЗАГРУЗКИ ПОЛЬЗОВАТЕЛЕЙ
-/uploads/*
-!/uploads/.gitkeep
-/storage/*
-!/storage/.gitkeep
-
-# БЭКАПЫ
-*.backup
-*.bak
-*.old
-*.tmp
-
-# ЛОГИ
+# Логи
 *.log
-logs/
-/logs/*
 
-# PHP
-.phpunit.result.cache
-.php-cs-fixer.cache
+# Конфигурационные файлы с локальными настройками
+/config/db-local.php
+/config/params-local.php
+/config/test_db-local.php
+/codeception.yml  # если содержит локальные настройки
 
-# ОПЕРАЦИОННЫЕ СИСТЕМЫ
-ehthumbs.db
-Icon?
-*.lnk
+# Тесты и отладка
+/tests/_output/
+/tests/_data/*.sql
+/tests/_data/*.sqlite
 
-# СЕССИИ
-/sessions/*
+# Vagrant
+/.vagrant/
+/vagrant/config/vagrant-local.yml
 
-# CACHE
-/cache/*
-!/cache/.gitkeep
+# Docker
+.env
+docker-compose.override.yml
 
-# ДОПОЛНИТЕЛЬНО ДЛЯ YII2
-/yii
-/yii.bat
-/requirements.php
-Vagrantfile
-vagrant/
-/codeception.yml
-
-# ПРОВЕРКА ПРАВ
-.permission-check
-
-# TEMP ФАЙЛЫ
-*.temp
+# Временные файлы
+*.cache
 *.tmp
-~$*
+
+# Пользовательские файлы (если есть)
+/uploads/
+/storage/
+
+# Файлы сессий (если хранятся в файлах)
+/sessions/
+
+# Миграции БД (но сами файлы миграций нужно коммитить!)
+# Только дампы:
+*.sql
+*.dump
+
+# Node.js (если используется)
+/node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Бэкапы
+*.bak
+*.backup
+
+# Пользовательские скрипты (если есть)
+/script

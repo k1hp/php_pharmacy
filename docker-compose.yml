@@ -12,6 +12,11 @@ services:
       - postgres_data:/var/lib/postgresql/data
     ports:
       - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U adminka -d apteka_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
     
   php:
     image: yiisoftware/yii2-php:8.4-apache
@@ -21,13 +26,67 @@ services:
     ports:
       - '8000:80'
     depends_on:
-      - apteka_postgres
-    # ТРИ КОМАНДЫ: установка зависимостей, права, миграции
+      apteka_postgres:
+        condition: service_healthy
+    working_dir: /app
+    environment:
+      - PHP_IDE_CONFIG=serverName=docker
+      - YII_ENV=dev
+      - YII_DEBUG=true
+    # Команды запуска
     command: >
       sh -c "
-      composer install --ignore-platform-reqs &&
+      # Ожидаем готовность БД
+      echo 'Ожидание готовности базы данных...' &&
+      sleep 5 &&
+      
+      # 1. Модифицируем существующий config/db.php для Docker
+      echo 'Настройка конфигурации БД для Docker...' &&
+      # Создаем резервную копию оригинального конфига
+      if [ ! -f 'config/db.php.backup' ]; then
+        cp config/db.php config/db.php.backup
+      fi &&
+      
+      # Создаем конфиг для Docker
+      cat > config/db.php << 'EOF'
+<?php
+return [
+    'class' => 'yii\\db\\Connection',
+    'dsn' => 'pgsql:host=apteka_postgres;port=5432;dbname=apteka_db',
+    'username' => 'adminka',
+    'password' => 'secret',
+    'charset' => 'utf8',
+    'schemaMap' => [
+        'pgsql'=> [
+            'class'=>'yii\\db\\pgsql\\Schema',
+            'defaultSchema' => 'public'
+        ]
+    ],
+    'on afterOpen' => function(\$event) {
+        \$event->sender->createCommand(\"SET timezone TO 'UTC'\")->execute();
+    }
+];
+EOF
+      
+      # 2. Устанавливаем зависимости
+      if [ ! -d 'vendor' ] || [ ! -f 'vendor/autoload.php' ]; then
+        echo 'Установка зависимостей Composer...' &&
+        composer install --no-interaction --no-progress --optimize-autoloader --ignore-platform-reqs
+      else
+        echo 'Зависимости уже установлены, пропускаем...'
+      fi &&
+      
+      # 3. Устанавливаем права
+      echo 'Настройка прав доступа...' &&
+      mkdir -p runtime web/assets &&
       chmod -R 777 runtime web/assets &&
+      
+      # 4. Применяем миграции БД
+      echo 'Применение миграций базы данных...' &&
       php yii migrate --interactive=0 &&
+      
+      # 5. Запускаем Apache
+      echo 'Запуск веб-сервера...' &&
       apache2-foreground
       "
 
