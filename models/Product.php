@@ -17,7 +17,6 @@ class Product extends \yii\db\ActiveRecord
             [['title', 'price'], 'required'],
             [['price', 'stock'], 'integer', 'min' => 0],
             [['title'], 'string', 'max' => 100],
-            [['image_url'], 'string', 'max' => 500],
             [['category'], 'string', 'max' => 50],
             [['stock'], 'default', 'value' => 0],
         ];
@@ -30,7 +29,6 @@ class Product extends \yii\db\ActiveRecord
             'title' => 'Название',
             'price' => 'Цена',
             'stock' => 'Количество на складе',
-            'image_url' => 'URL изображения',
             'category' => 'Категория',
         ];
     }

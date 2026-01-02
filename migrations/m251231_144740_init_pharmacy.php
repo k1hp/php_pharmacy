@@ -37,7 +37,6 @@ public function safeUp()
             'title' => $this->string(100)->notNull(),
             'price' => $this->integer()->notNull()->check('price >= 0'),
             'stock' => $this->integer()->defaultValue(0)->notNull()->check('stock >= 0'),
-            'image_url' => $this->string(500),
             'category' => $this->string(50),
         ]);
 
