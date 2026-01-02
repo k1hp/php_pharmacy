@@ -154,8 +154,8 @@ $this->params['breadcrumbs'][] = $this->title;
                 
                 <?php if ($total > 0): ?>
                 <a href="<?= Url::to(['order/create']) ?>" class="btn btn-success btn-lg">
-                    <i class="fas fa-credit-card me-2"></i>Оформить заказ
-                </a>
+    <i class="fas fa-credit-card me-2"></i>Оформить заказ
+		</a>
                 <?php endif; ?>
             </div>
         </div>

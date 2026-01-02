@@ -66,4 +66,67 @@ class Order extends \yii\db\ActiveRecord
         return $this->hasMany(Product::class, ['product_id' => 'product_id'])
             ->via('orderItems');
     }
+/**
+     * Получаем человекочитаемый статус заказа
+     */
+    public function getStatusLabel()
+    {
+        $labels = [
+            self::STATUS_PENDING => 'Ожидает оплаты',
+            self::STATUS_PAID => 'Оплачен',
+            self::STATUS_SHIPPED => 'Отправлен',
+            self::STATUS_DELIVERED => 'Доставлен',
+            self::STATUS_CANCELLED => 'Отменен',
+        ];
+        
+        return $labels[$this->status] ?? $this->status;
+    }
+    
+    /**
+     * Получаем CSS класс для статуса
+     */
+    public function getStatusClass()
+    {
+        $classes = [
+            self::STATUS_PENDING => 'warning',
+            self::STATUS_PAID => 'info',
+            self::STATUS_SHIPPED => 'primary',
+            self::STATUS_DELIVERED => 'success',
+            self::STATUS_CANCELLED => 'danger',
+        ];
+        
+        return $classes[$this->status] ?? 'secondary';
+    }
+    
+    /**
+     * Проверяем, можно ли отменить заказ
+     */
+    public function canCancel()
+    {
+        return $this->status === self::STATUS_PENDING;
+    }
+    
+    /**
+     * Получаем количество товаров в заказе
+     */
+    public function getItemsCount()
+    {
+        return OrderItem::find()
+            ->where(['order_id' => $this->order_id])
+            ->sum('quantity') ?: 0;
+    }
+    
+    /**
+     * Получаем все статусы
+     */
+    public static function getStatuses()
+    {
+        return [
+            self::STATUS_PENDING => 'Ожидает оплаты',
+            self::STATUS_PAID => 'Оплачен',
+            self::STATUS_SHIPPED => 'Отправлен',
+            self::STATUS_DELIVERED => 'Доставлен',
+            self::STATUS_CANCELLED => 'Отменен',
+        ];
+    }
 }

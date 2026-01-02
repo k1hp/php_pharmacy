@@ -1,17 +1,19 @@
 <?php
+// controllers/OrderController.php
 
 namespace app\controllers;
 
 use Yii;
 use yii\web\Controller;
+use yii\web\NotFoundHttpException;
 use yii\filters\AccessControl;
+use app\models\Cart;
 use app\models\Order;
 use app\models\OrderItem;
-use app\models\Cart;
-use app\models\CartItem;
 use app\models\Product;
 use app\models\Wallet;
-use yii\db\Transaction;
+use app\models\OrderForm;
+use yii\web\Response;
 
 class OrderController extends Controller
 {
@@ -31,34 +33,42 @@ class OrderController extends Controller
     }
 
     /**
-     * Форма оформления заказа
+     * Создание заказа из корзины
      */
     public function actionCreate()
     {
-        $profileId = Yii::$app->user->identity->profile_id;
-        $cart = $this->getActiveCart($profileId);
+        $profile = Yii::$app->user->identity;
+        $cart = Cart::find()
+            ->where(['profile_id' => $profile->profile_id, 'is_active' => true])
+            ->one();
         
-        if (!$cart) {
-            Yii::$app->session->setFlash('error', 'Корзина пуста.');
-            return $this->redirect(['/cart/index']);
+        if (!$cart || $cart->isEmpty()) {
+            Yii::$app->session->setFlash('error', 'Ваша корзина пуста. Добавьте товары для оформления заказа.');
+            return $this->redirect(['cart/index']);
         }
         
-        $cartItems = $cart->cartItems;
-        if (empty($cartItems)) {
-            Yii::$app->session->setFlash('error', 'Корзина пуста.');
-            return $this->redirect(['/cart/index']);
-        }
+        $model = new OrderForm();
+        $wallet = Wallet::findOne(['wallet_id' => $profile->wallet_id]);
         
-        // Считаем сумму и проверяем наличие
+        // Подготавливаем данные для отображения
         $items = [];
         $total = 0;
+        $hasErrors = false;
         
-        foreach ($cartItems as $cartItem) {
+        foreach ($cart->cartItems as $cartItem) {
             $product = $cartItem->product;
+            if (!$product) {
+                Yii::$app->session->addFlash('error', "Товар #{$cartItem->product_id} не найден");
+                $hasErrors = true;
+                continue;
+            }
             
-            if (!$product || $product->stock < $cartItem->quantity) {
-                Yii::$app->session->setFlash('error', 'Некоторые товары недоступны.');
-                return $this->redirect(['/cart/index']);
+            if ($product->stock < $cartItem->quantity) {
+                Yii::$app->session->addFlash('error', 
+                    "Недостаточно товара '{$product->title}'. В наличии: {$product->stock} шт., в корзине: {$cartItem->quantity} шт."
+                );
+                $hasErrors = true;
+                continue;
             }
             
             $itemTotal = $cartItem->quantity * $product->price;
@@ -72,127 +82,167 @@ class OrderController extends Controller
         }
         
         // Проверяем баланс
-        $wallet = Wallet::findOne(Yii::$app->user->identity->wallet_id);
         if ($wallet->balance < $total) {
-            Yii::$app->session->setFlash('error', 'Недостаточно средств.');
-            return $this->redirect(['/cart/index']);
+            Yii::$app->session->setFlash('error', 
+                "Недостаточно средств на кошельке. Ваш баланс: " . 
+                number_format($wallet->balance, 0, '', ' ') . " ₽, " .
+                "нужно: " . number_format($total, 0, '', ' ') . " ₽"
+            );
+            $hasErrors = true;
         }
         
-        // Создаем заказ
-        $order = new Order();
-        $order->profile_id = $profileId;
-        $order->cart_id = $cart->cart_id;
-        $order->total = $total;
-        $order->status = Order::STATUS_PENDING;
+        if ($hasErrors) {
+            return $this->redirect(['cart/index']);
+        }
         
-        if ($order->load(Yii::$app->request->post()) && $order->save()) {
-            return $this->processOrder($order, $cart, $items, $wallet);
+        if (Yii::$app->request->isPost && $model->load(Yii::$app->request->post())) {
+            $order = $model->createOrder($cart, $profile);
+            
+            if ($order) {
+                Yii::$app->session->setFlash('success', 
+                    "Заказ #{$order->order_id} успешно оформлен! " .
+                    "Списано: " . number_format($order->total, 0, '', ' ') . " ₽. " .
+                    "Статус: " . $order->getStatusLabel()
+                );
+                return $this->redirect(['order/view', 'id' => $order->order_id]);
+            } else {
+                Yii::$app->session->setFlash('error', 'Ошибка при оформлении заказа. Проверьте данные.');
+            }
+        } else {
+            // Предзаполняем адрес доставки
+            $model->delivery_address = 'Самовывоз из аптеки';
         }
         
         return $this->render('create', [
-            'order' => $order,
+            'model' => $model,
+            'cart' => $cart,
             'items' => $items,
             'total' => $total,
             'wallet' => $wallet,
+            'profile' => $profile,
         ]);
     }
 
     /**
-     * Обработка заказа
-     */
-    private function processOrder($order, $cart, $items, $wallet)
-    {
-        $transaction = Yii::$app->db->beginTransaction();
-        
-        try {
-            // Создаем OrderItems
-            foreach ($items as $item) {
-                $orderItem = new OrderItem();
-                $orderItem->order_id = $order->order_id;
-                $orderItem->product_id = $item['product']->product_id;
-                $orderItem->quantity = $item['cartItem']->quantity;
-                if (!$orderItem->save()) {
-                    throw new \Exception('Ошибка создания OrderItem');
-                }
-                
-                // Обновляем остатки
-                $item['product']->stock -= $item['cartItem']->quantity;
-                if (!$item['product']->save()) {
-                    throw new \Exception('Ошибка обновления остатков');
-                }
-            }
-            
-            // Списание средств
-            $wallet->balance -= $order->total;
-            if (!$wallet->save()) {
-                throw new \Exception('Ошибка списания средств');
-            }
-            
-            // Деактивируем корзину
-            $cart->is_active = false;
-            if (!$cart->save()) {
-                throw new \Exception('Ошибка обновления корзины');
-            }
-            
-            $transaction->commit();
-            
-            return $this->redirect(['success', 'id' => $order->order_id]);
-            
-        } catch (\Exception $e) {
-            $transaction->rollBack();
-            Yii::$app->session->setFlash('error', 'Ошибка: ' . $e->getMessage());
-            return $this->refresh();
-        }
-    }
-
-    /**
-     * Страница успеха
-     */
-    public function actionSuccess($id)
-    {
-        $order = Order::findOne($id);
-        
-        if (!$order || $order->profile_id != Yii::$app->user->identity->profile_id) {
-            throw new \yii\web\NotFoundHttpException('Заказ не найден.');
-        }
-        
-        return $this->render('success', ['order' => $order]);
-    }
-
-    /**
-     * История заказов
-     */
-    public function actionHistory()
-    {
-        $orders = Order::find()
-            ->where(['profile_id' => Yii::$app->user->identity->profile_id])
-            ->orderBy(['created_at' => SORT_DESC])
-            ->all();
-        
-        return $this->render('history', ['orders' => $orders]);
-    }
-
-    /**
-     * Просмотр заказа
+     * Просмотр деталей заказа
      */
     public function actionView($id)
     {
         $order = Order::findOne($id);
         
-        if (!$order || $order->profile_id != Yii::$app->user->identity->profile_id) {
-            throw new \yii\web\NotFoundHttpException('Заказ не найден.');
+        if (!$order) {
+            throw new NotFoundHttpException('Заказ не найден');
         }
         
-        return $this->render('view', ['order' => $order]);
+        if ($order->profile_id != Yii::$app->user->identity->profile_id) {
+            throw new NotFoundHttpException('Доступ запрещен');
+        }
+        
+        $orderItems = OrderItem::find()
+            ->where(['order_id' => $order->order_id])
+            ->all();
+        
+        $items = [];
+        foreach ($orderItems as $orderItem) {
+            $product = Product::findOne($orderItem->product_id);
+            if ($product) {
+                $items[] = [
+                    'orderItem' => $orderItem,
+                    'product' => $product,
+                    'itemTotal' => $orderItem->quantity * $product->price,
+                ];
+            }
+        }
+        
+        return $this->render('view', [
+            'order' => $order,
+            'items' => $items,
+        ]);
     }
 
     /**
-     * Вспомогательный метод
+     * История заказов пользователя
      */
-    private function getActiveCart($profileId)
+    public function actionHistory()
     {
-        return Cart::find()
-            ->where(['profile_id' => $profileId, 'is_active' => true])
-            ->one();
+        $profile = Yii::$app->user->identity;
+        $orders = Order::find()
+            ->where(['profile_id' => $profile->profile_id])
+            ->orderBy(['created_at' => SORT_DESC])
+            ->all();
+        
+        return $this->render('history', [
+            'orders' => $orders,
+        ]);
+    }
+
+    /**
+     * AJAX: Отмена заказа
+     */
+    public function actionCancel()
+    {
+        Yii::$app->response->format = Response::FORMAT_JSON;
+        
+        if (Yii::$app->user->isGuest) {
+            return ['success' => false, 'message' => 'Требуется авторизация'];
+        }
+        
+        $orderId = Yii::$app->request->post('id');
+        $order = Order::findOne($orderId);
+        
+        if (!$order) {
+            return ['success' => false, 'message' => 'Заказ не найден'];
+        }
+        
+        if ($order->profile_id != Yii::$app->user->identity->profile_id) {
+            return ['success' => false, 'message' => 'Доступ запрещен'];
+        }
+        
+        if (!$order->canCancel()) {
+            return ['success' => false, 'message' => 'Заказ уже обрабатывается и не может быть отменен'];
+        }
+        
+        $transaction = Yii::$app->db->beginTransaction();
+        try {
+            // 1. Возвращаем товары на склад
+            foreach ($order->orderItems as $orderItem) {
+                $product = Product::findOne($orderItem->product_id);
+                if ($product) {
+                    $product->stock += $orderItem->quantity;
+                    if (!$product->save()) {
+                        throw new \Exception('Не удалось вернуть товар на склад');
+                    }
+                }
+            }
+            
+            // 2. Возвращаем деньги на кошелек
+            $wallet = Wallet::findOne(['wallet_id' => Yii::$app->user->identity->wallet_id]);
+            if ($wallet) {
+                $wallet->balance += $order->total;
+                if (!$wallet->save()) {
+                    throw new \Exception('Не удалось вернуть средства');
+                }
+            }
+            
+            // 3. Меняем статус заказа
+            $order->status = Order::STATUS_CANCELLED;
+            if (!$order->save()) {
+                throw new \Exception('Не удалось обновить статус заказа');
+            }
+            
+            $transaction->commit();
+            
+            return [
+                'success' => true,
+                'message' => 'Заказ успешно отменен. Средства возвращены на кошелек.',
+                'newStatus' => $order->status,
+                'newBalance' => $wallet ? $wallet->balance : null,
+            ];
+            
+        } catch (\Exception $e) {
+            $transaction->rollBack();
+            Yii::error($e->getMessage());
+            return ['success' => false, 'message' => 'Ошибка при отмене заказа'];
+        }
     }
 }

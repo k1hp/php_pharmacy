@@ -52,4 +52,47 @@ class Cart extends \yii\db\ActiveRecord
     {
         return $this->hasMany(Order::class, ['cart_id' => 'cart_id']);
     }
+/**
+     * Проверяем, пустая ли корзина
+     */
+    public function isEmpty()
+    {
+        return $this->getCartItems()->count() === 0;
+    }
+    
+    /**
+     * Получаем общее количество товаров в корзине
+     */
+    public function getTotalQuantity()
+    {
+        return CartItem::find()
+            ->where(['cart_id' => $this->cart_id])
+            ->sum('quantity') ?: 0;
+    }
+    
+    /**
+     * Получаем общую сумму корзины
+     */
+    public function getTotalPrice()
+    {
+        $total = 0;
+        foreach ($this->cartItems as $cartItem) {
+            if ($cartItem->product) {
+                $total += $cartItem->quantity * $cartItem->product->price;
+            }
+        }
+        return $total;
+    }
+    
+    /**
+     * Получаем уникальное количество товаров (разных позиций)
+     */
+    public function getUniqueItemsCount()
+    {
+        return CartItem::find()
+            ->where(['cart_id' => $this->cart_id])
+            ->count();
+    }
 }
+
+

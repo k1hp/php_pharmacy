@@ -7,6 +7,7 @@ use yii\web\Controller;
 use app\models\Profile;
 use app\models\Wallet;
 use app\models\Order;
+use app\models\OrderItem;
 
 class ProfileController extends Controller
 {
@@ -37,22 +38,9 @@ class ProfileController extends Controller
             'wallet' => $wallet
         ]);
     }
-    
     public function actionOrders()
     {
-        if (Yii::$app->user->isGuest) {
-            return $this->redirect(['site/login']);
-        }
-        
-        $profile = Yii::$app->user->identity;
-        $orders = Order::find()
-            ->where(['profile_id' => $profile->profile_id])
-            ->orderBy(['created_at' => SORT_DESC])
-            ->all();
-        
-        return $this->render('orders', [
-            'profile' => $profile,
-            'orders' => $orders
-        ]);
+        // Перенаправляем на OrderController
+        return $this->redirect(['order/history']);
     }
-}
+} 
