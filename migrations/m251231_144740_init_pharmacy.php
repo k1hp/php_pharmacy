@@ -104,7 +104,7 @@ public function safeUp()
             'profile_id' => $this->bigInteger()->notNull(),
             'cart_id' => $this->bigInteger()->notNull(),
             'total' => $this->integer()->notNull()->check('total >= 0'),
-            'status' => $this->string(20)->defaultValue('pending')->check("status IN ('pending', 'paid', 'shipped', 'delivered', 'cancelled')"),
+            'status' => $this->string(20)->defaultValue('pending')->check("status IN ('pending', 'paid', 'shipped', 'completed', 'cancelled')"),
             'delivery_address' => $this->text(),
             'created_at' => $this->timestamp()->defaultExpression('CURRENT_TIMESTAMP'),
         ]);

@@ -1,56 +1,85 @@
-// web/js/orders.js
+// web/js/orders.js (обновляем URL)
 
 $(document).ready(function() {
     console.log('Orders JS loaded');
     
+    // Вспомогательная функция для получения URL
+    function getActionUrl(action, id = null) {
+        // Проверяем, как работают URL в вашем проекте
+        // Если используется index.php?r=controller/action
+        let url = '/index.php?r=order/' + action;
+        if (id) {
+            url += '&id=' + id;
+        }
+        return url;
+    }
+    
     // Инициализация тултипов Bootstrap
     $('[data-bs-toggle="tooltip"]').tooltip();
     
-    // Подтверждение отмены заказа в таблице
-    $('.cancel-order-btn').on('click', function(e) {
+    // Подтверждение получения заказа
+    $(document).on('click', '.complete-order-btn', function(e) {
         e.preventDefault();
         
         const orderId = $(this).data('order-id');
         const orderNumber = $(this).data('order-number');
         const button = $(this);
         
-        if (!confirm(`Вы уверены, что хотите отменить заказ #${orderNumber}? Средства будут возвращены на ваш кошелек.`)) {
+        if (!confirm(`Вы получили заказ #${orderNumber}?`)) {
+            return;
+        }
+        
+        completeOrder(orderId, button);
+    });
+    
+    // Подтверждение отмены заказа
+    $(document).on('click', '.cancel-order-btn', function(e) {
+        e.preventDefault();
+        
+        const orderId = $(this).data('order-id');
+        const orderNumber = $(this).data('order-number');
+        const button = $(this);
+        
+        if (!confirm(`Отменить заказ #${orderNumber}? Средства вернутся на кошелек.`)) {
             return;
         }
         
         cancelOrder(orderId, button);
     });
     
-    // Валидация формы заказа
-    $('#order-form').on('submit', function(e) {
-        const submitBtn = $(this).find('button[type="submit"]');
+    // Подтверждение удаления заказа
+    $(document).on('click', '.delete-order-btn', function(e) {
+        e.preventDefault();
         
-        // Показываем индикатор загрузки
-        submitBtn.prop('disabled', true);
-        submitBtn.html('<i class="fas fa-spinner fa-spin me-2"></i> Оформление...');
+        const orderId = $(this).data('order-id');
+        const orderNumber = $(this).data('order-number');
+        const button = $(this);
         
-        return true;
+        if (!confirm(`Удалить заказ #${orderNumber}? Это действие необратимо.`)) {
+            return;
+        }
+        
+        deleteOrder(orderId, button);
     });
     
-    // Функция отмены заказа
-    function cancelOrder(orderId, button) {
+    // Функция получения заказа
+    function completeOrder(orderId, button) {
         const originalHtml = button.html();
         button.prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i>');
         
         $.ajax({
-            url: '/index.php?r=order/cancel',
+            url: getActionUrl('complete'),
             method: 'POST',
             data: {id: orderId},
             dataType: 'json',
             success: function(response) {
+                console.log('Complete response:', response);
                 if (response.success) {
                     showNotification(response.message, 'success');
                     
-                    // Обновляем интерфейс через 1 секунду
+                    // Обновляем страницу через 1 секунду
                     setTimeout(function() {
-                        if (typeof window.location !== 'undefined') {
-                            location.reload();
-                        }
+                        location.reload();
                     }, 1000);
                 } else {
                     showNotification(response.message, 'error');
@@ -58,33 +87,78 @@ $(document).ready(function() {
                 }
             },
             error: function(xhr, status, error) {
-                showNotification('Ошибка сети. Попробуйте еще раз.', 'error');
+                console.error('AJAX error:', error);
+                console.log('Response text:', xhr.responseText);
+                showNotification('Ошибка сети. Проверьте консоль для деталей.', 'error');
                 button.prop('disabled', false).html(originalHtml);
-                console.error('Order cancellation error:', error);
             }
         });
     }
     
-    // Автозаполнение адреса доставки
-    $('#orderform-delivery_address').on('focus', function() {
-        const currentVal = $(this).val().trim();
-        if (currentVal === 'Самовывоз из аптеки') {
-            $(this).select();
-        }
-    });
-    
-    // Переключение между самовывозом и доставкой
-    $('#delivery-toggle').on('click', function(e) {
-        e.preventDefault();
-        const addressField = $('#orderform-delivery_address');
-        const currentVal = addressField.val().trim();
+    // Функция отмены заказа
+    function cancelOrder(orderId, button) {
+        const originalHtml = button.html();
+        button.prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i>');
         
-        if (currentVal === 'Самовывоз из аптеки' || currentVal === '') {
-            addressField.val('г. Москва, ул. Примерная, д. 1, кв. 1');
-            $(this).html('<i class="fas fa-store me-1"></i> Самовывоз');
-        } else {
-            addressField.val('Самовывоз из аптеки');
-            $(this).html('<i class="fas fa-truck me-1"></i> Доставка');
-        }
-    });
+        $.ajax({
+            url: getActionUrl('cancel'),
+            method: 'POST',
+            data: {id: orderId},
+            dataType: 'json',
+            success: function(response) {
+                console.log('Cancel response:', response);
+                if (response.success) {
+                    showNotification(response.message, 'success');
+                    
+                    // Обновляем страницу через 1 секунду
+                    setTimeout(function() {
+                        location.reload();
+                    }, 1000);
+                } else {
+                    showNotification(response.message, 'error');
+                    button.prop('disabled', false).html(originalHtml);
+                }
+            },
+            error: function(xhr, status, error) {
+                console.error('AJAX error:', error);
+                console.log('Response text:', xhr.responseText);
+                showNotification('Ошибка сети. Проверьте консоль для деталей.', 'error');
+                button.prop('disabled', false).html(originalHtml);
+            }
+        });
+    }
+    
+    // Функция удаления заказа
+    function deleteOrder(orderId, button) {
+        const originalHtml = button.html();
+        button.prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i>');
+        
+        $.ajax({
+            url: getActionUrl('delete'),
+            method: 'POST',
+            data: {id: orderId},
+            dataType: 'json',
+            success: function(response) {
+                console.log('Delete response:', response);
+                if (response.success) {
+                    showNotification(response.message, 'success');
+                    
+                    // Удаляем строку из таблицы
+                    const row = button.closest('tr');
+                    row.fadeOut(300, function() {
+                        row.remove();
+                    });
+                } else {
+                    showNotification(response.message, 'error');
+                    button.prop('disabled', false).html(originalHtml);
+                }
+            },
+            error: function(xhr, status, error) {
+                console.error('AJAX error:', error);
+                console.log('Response text:', xhr.responseText);
+                showNotification('Ошибка сети. Проверьте консоль для деталей.', 'error');
+                button.prop('disabled', false).html(originalHtml);
+            }
+        });
+    }
 });

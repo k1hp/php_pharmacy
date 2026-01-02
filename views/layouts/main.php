@@ -102,11 +102,13 @@ $this->registerCssFile('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.
                     ) . '</li>'
                     // Заказы со счетчиком
                     . '<li>' . Html::a(
-                        '<i class="fas fa-shopping-bag me-2"></i>Мои заказы' 
-                        . ($orderCount > 0 ? ' <span class="badge bg-primary float-end">' . $orderCount . '</span>' : ''), 
-                        ['/profile/orders'], 
-                        ['class' => 'dropdown-item', 'encode' => false]
-                    ) . '</li>'
+    '<span class="d-flex justify-content-between align-items-center w-100">'
+    . '<span><i class="fas fa-shopping-bag me-2"></i>Мои заказы</span>'
+    . ($orderCount > 0 ? '<span class="badge bg-primary ms-2">' . $orderCount . '</span>' : '')
+    . '</span>', 
+    ['/profile/orders'], 
+    ['class' => 'dropdown-item', 'encode' => false]
+) . '</li>'
                     . '<li><hr class="dropdown-divider"></li>'
                     // Выход
                     . '<li>'

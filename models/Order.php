@@ -1,22 +1,42 @@
 <?php
+// models/Order.php
 
 namespace app\models;
 
 use Yii;
 
+/**
+ * This is the model class for table "orders".
+ *
+ * @property int $order_id
+ * @property int $profile_id
+ * @property int $cart_id
+ * @property int $total
+ * @property string $status
+ * @property string|null $delivery_address
+ * @property string $created_at
+ *
+ * @property Cart $cart
+ * @property Profile $profile
+ * @property OrderItem[] $orderItems
+ */
 class Order extends \yii\db\ActiveRecord
 {
-    const STATUS_PENDING = 'pending';
-    const STATUS_PAID = 'paid';
-    const STATUS_SHIPPED = 'shipped';
-    const STATUS_DELIVERED = 'delivered';
-    const STATUS_CANCELLED = 'cancelled';
+    const STATUS_PAID = 'paid';           // Оплачен
+    const STATUS_COMPLETED = 'completed'; // Получен
+    const STATUS_CANCELLED = 'cancelled'; // Отменен
 
+    /**
+     * {@inheritdoc}
+     */
     public static function tableName()
     {
         return 'orders';
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function rules()
     {
         return [
@@ -26,13 +46,20 @@ class Order extends \yii\db\ActiveRecord
             [['status'], 'string'],
             [['delivery_address'], 'string'],
             [['created_at'], 'safe'],
-            [['status'], 'default', 'value' => self::STATUS_PENDING],
-            [['status'], 'in', 'range' => [self::STATUS_PENDING, self::STATUS_PAID, self::STATUS_SHIPPED, self::STATUS_DELIVERED, self::STATUS_CANCELLED]],
+            [['status'], 'default', 'value' => self::STATUS_PAID],
+            [['status'], 'in', 'range' => [
+                self::STATUS_PAID, 
+                self::STATUS_COMPLETED, 
+                self::STATUS_CANCELLED
+            ]],
             [['profile_id'], 'exist', 'skipOnError' => true, 'targetClass' => Profile::class, 'targetAttribute' => ['profile_id' => 'profile_id']],
             [['cart_id'], 'exist', 'skipOnError' => true, 'targetClass' => Cart::class, 'targetAttribute' => ['cart_id' => 'cart_id']],
         ];
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function attributeLabels()
     {
         return [
@@ -66,16 +93,15 @@ class Order extends \yii\db\ActiveRecord
         return $this->hasMany(Product::class, ['product_id' => 'product_id'])
             ->via('orderItems');
     }
-/**
+    
+    /**
      * Получаем человекочитаемый статус заказа
      */
     public function getStatusLabel()
     {
         $labels = [
-            self::STATUS_PENDING => 'Ожидает оплаты',
             self::STATUS_PAID => 'Оплачен',
-            self::STATUS_SHIPPED => 'Отправлен',
-            self::STATUS_DELIVERED => 'Доставлен',
+            self::STATUS_COMPLETED => 'Получен',
             self::STATUS_CANCELLED => 'Отменен',
         ];
         
@@ -88,10 +114,8 @@ class Order extends \yii\db\ActiveRecord
     public function getStatusClass()
     {
         $classes = [
-            self::STATUS_PENDING => 'warning',
             self::STATUS_PAID => 'info',
-            self::STATUS_SHIPPED => 'primary',
-            self::STATUS_DELIVERED => 'success',
+            self::STATUS_COMPLETED => 'success',
             self::STATUS_CANCELLED => 'danger',
         ];
         
@@ -99,11 +123,27 @@ class Order extends \yii\db\ActiveRecord
     }
     
     /**
+     * Проверяем, можно ли отметить как полученный
+     */
+    public function canComplete()
+    {
+        return $this->status === self::STATUS_PAID;
+    }
+    
+    /**
      * Проверяем, можно ли отменить заказ
      */
     public function canCancel()
     {
-        return $this->status === self::STATUS_PENDING;
+        return $this->status === self::STATUS_PAID;
+    }
+    
+    /**
+     * Проверяем, можно ли удалить заказ
+     */
+    public function canDelete()
+    {
+        return $this->status === self::STATUS_CANCELLED;
     }
     
     /**
@@ -122,11 +162,21 @@ class Order extends \yii\db\ActiveRecord
     public static function getStatuses()
     {
         return [
-            self::STATUS_PENDING => 'Ожидает оплаты',
             self::STATUS_PAID => 'Оплачен',
-            self::STATUS_SHIPPED => 'Отправлен',
-            self::STATUS_DELIVERED => 'Доставлен',
+            self::STATUS_COMPLETED => 'Получен',
             self::STATUS_CANCELLED => 'Отменен',
         ];
+    }
+    
+    /**
+     * Отмечаем заказ как полученный
+     */
+    public function markAsCompleted()
+    {
+        if ($this->canComplete()) {
+            $this->status = self::STATUS_COMPLETED;
+            return $this->save(false, ['status']);
+        }
+        return false;
     }
 }

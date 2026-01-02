@@ -1,5 +1,5 @@
 <?php
-// models/OrderForm.php
+// models/OrderForm.php (обновляем создание заказа)
 
 namespace app\models;
 
@@ -81,12 +81,12 @@ class OrderForm extends Model
         
         $transaction = Yii::$app->db->beginTransaction();
         try {
-            // 1. Создаем заказ
+            // 1. Создаем заказ со статусом "оплачен"
             $order = new Order();
             $order->profile_id = $profile->profile_id;
             $order->cart_id = $cart->cart_id;
             $order->total = $total;
-            $order->status = Order::STATUS_PENDING;
+            $order->status = Order::STATUS_PAID; // Всегда оплачен при создании
             $order->delivery_address = $this->delivery_address ?: 'Самовывоз из аптеки';
             $order->created_at = date('Y-m-d H:i:s');
             

@@ -23,7 +23,7 @@ $this->registerCssFile('@web/css/orders.css');
                     </h1>
                     <div class="text-muted">
                         <i class="far fa-calendar me-1"></i>
-                        <?= Yii::$app->formatter->asDatetime($order->created_at) ?>
+                        <?= Yii::$app->formatter->asDatetime($order->created_at, 'php:j M, Y H:i:s') ?>
                     </div>
                 </div>
                 
@@ -77,17 +77,25 @@ $this->registerCssFile('@web/css/orders.css');
             </div>
             
             <!-- Действия -->
-            <?php if ($order->canCancel()): ?>
-                <div class="alert alert-warning d-flex align-items-center justify-content-between">
-                    <div>
-                        <i class="fas fa-exclamation-triangle me-2"></i>
-                        Заказ ожидает оплаты. Вы можете отменить его.
-                    </div>
-                    <button class="btn btn-outline-danger btn-sm" id="cancel-order-btn" data-order-id="<?= $order->order_id ?>">
+            <div class="d-flex gap-2 mt-3">
+                <?php if ($order->canComplete()): ?>
+                    <button class="btn btn-success" id="complete-order-btn" data-order-id="<?= $order->order_id ?>">
+                        <i class="fas fa-check-circle me-1"></i> Получить заказ
+                    </button>
+                <?php endif; ?>
+                
+                <?php if ($order->canCancel()): ?>
+                    <button class="btn btn-outline-danger" id="cancel-order-btn" data-order-id="<?= $order->order_id ?>">
                         <i class="fas fa-times me-1"></i> Отменить заказ
                     </button>
-                </div>
-            <?php endif; ?>
+                <?php endif; ?>
+                
+                <?php if ($order->canDelete()): ?>
+                    <button class="btn btn-danger" id="delete-order-btn" data-order-id="<?= $order->order_id ?>">
+                        <i class="fas fa-trash me-1"></i> Удалить заказ
+                    </button>
+                <?php endif; ?>
+            </div>
         </div>
     </div>
     
@@ -112,31 +120,22 @@ $this->registerCssFile('@web/css/orders.css');
                     </thead>
                     <tbody>
                         <?php foreach ($items as $item): 
-                            $orderItem = $item['orderItem'];
                             $product = $item['product'];
                         ?>
                         <tr>
                             <td>
-                                <div class="d-flex align-items-center">
-                                    <?php if ($product->image_url): ?>
-                                        <img src="<?= Html::encode($product->image_url) ?>" 
-                                             alt="<?= Html::encode($product->title) ?>"
-                                             class="img-thumbnail me-3" 
-                                             style="width: 50px; height: 50px; object-fit: cover;">
+                                <div>
+                                    <strong><?= Html::encode($product->title) ?></strong>
+                                    <?php if ($product->category): ?>
+                                        <div class="text-muted small"><?= Html::encode($product->category) ?></div>
                                     <?php endif; ?>
-                                    <div>
-                                        <strong><?= Html::encode($product->title) ?></strong>
-                                        <?php if ($product->category): ?>
-                                            <div class="text-muted small"><?= Html::encode($product->category) ?></div>
-                                        <?php endif; ?>
-                                    </div>
                                 </div>
                             </td>
                             <td class="text-center fw-bold align-middle">
                                 <?= number_format($product->price, 0, '', ' ') ?> ₽
                             </td>
                             <td class="text-center align-middle">
-                                <?= $orderItem->quantity ?> шт.
+                                <?= $item['orderItem']->quantity ?> шт.
                             </td>
                             <td class="text-center fw-bold text-success align-middle">
                                 <?= number_format($item['itemTotal'], 0, '', ' ') ?> ₽
@@ -171,6 +170,41 @@ $this->registerCssFile('@web/css/orders.css');
 
 <?php
 $this->registerJs(<<<JS
+// Обработка получения заказа
+$('#complete-order-btn').on('click', function() {
+    if (!confirm('Вы уверены, что получили заказ? После этого статус изменится на "Получен".')) {
+        return;
+    }
+    
+    const orderId = $(this).data('order-id');
+    const btn = $(this);
+    
+    btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin me-1"></i> Обработка...');
+    
+    $.ajax({
+        url: '/index.php?r=order/complete',
+        method: 'POST',
+        data: {id: orderId},
+        dataType: 'json',
+        success: function(response) {
+            if (response.success) {
+                showNotification(response.message, 'success');
+                setTimeout(function() {
+                    location.reload();
+                }, 1500);
+            } else {
+                showNotification(response.message, 'error');
+                btn.prop('disabled', false).html('<i class="fas fa-check-circle me-1"></i> Получить заказ');
+            }
+        },
+        error: function(xhr, status, error) {
+            console.error('AJAX error:', error);
+            showNotification('Ошибка сети. Проверьте консоль для деталей.', 'error');
+            btn.prop('disabled', false).html('<i class="fas fa-check-circle me-1"></i> Получить заказ');
+        }
+    });
+});
+
 // Обработка отмены заказа
 $('#cancel-order-btn').on('click', function() {
     if (!confirm('Вы уверены, что хотите отменить заказ? Средства будут возвращены на кошелек.')) {
@@ -190,18 +224,53 @@ $('#cancel-order-btn').on('click', function() {
         success: function(response) {
             if (response.success) {
                 showNotification(response.message, 'success');
-                // Обновляем страницу через 2 секунды
                 setTimeout(function() {
                     location.reload();
-                }, 2000);
+                }, 1500);
             } else {
                 showNotification(response.message, 'error');
                 btn.prop('disabled', false).html('<i class="fas fa-times me-1"></i> Отменить заказ');
             }
         },
-        error: function() {
-            showNotification('Ошибка сети', 'error');
+        error: function(xhr, status, error) {
+            console.error('AJAX error:', error);
+            showNotification('Ошибка сети. Проверьте консоль для деталей.', 'error');
             btn.prop('disabled', false).html('<i class="fas fa-times me-1"></i> Отменить заказ');
+        }
+    });
+});
+
+// Обработка удаления заказа
+$('#delete-order-btn').on('click', function() {
+    if (!confirm('Вы уверены, что хотите удалить заказ? Это действие необратимо.')) {
+        return;
+    }
+    
+    const orderId = $(this).data('order-id');
+    const btn = $(this);
+    
+    btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin me-1"></i> Удаление...');
+    
+    $.ajax({
+        url: '/index.php?r=order/delete',
+        method: 'POST',
+        data: {id: orderId},
+        dataType: 'json',
+        success: function(response) {
+            if (response.success) {
+                showNotification(response.message, 'success');
+                setTimeout(function() {
+                    window.location.href = '/index.php?r=order/history';
+                }, 1000);
+            } else {
+                showNotification(response.message, 'error');
+                btn.prop('disabled', false).html('<i class="fas fa-trash me-1"></i> Удалить заказ');
+            }
+        },
+        error: function(xhr, status, error) {
+            console.error('AJAX error:', error);
+            showNotification('Ошибка сети. Проверьте консоль для деталей.', 'error');
+            btn.prop('disabled', false).html('<i class="fas fa-trash me-1"></i> Удалить заказ');
         }
     });
 });

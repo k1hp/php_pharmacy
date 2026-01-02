@@ -46,7 +46,9 @@ $this->registerJsFile('@web/js/orders.js', ['depends' => [\yii\web\JqueryAsset::
                             </tr>
                         </thead>
                         <tbody>
-                            <?php foreach ($orders as $order): ?>
+                            <?php foreach ($orders as $order): 
+                                $itemsCount = $order->getItemsCount();
+                            ?>
                             <tr>
                                 <td class="fw-bold">#<?= $order->order_id ?></td>
                                 <td>
@@ -58,7 +60,7 @@ $this->registerJsFile('@web/js/orders.js', ['depends' => [\yii\web\JqueryAsset::
                                     </div>
                                 </td>
                                 <td class="text-center">
-                                    <span class="badge bg-info rounded-pill"><?= $order->getItemsCount() ?></span>
+                                    <span class="badge bg-info rounded-pill"><?= $itemsCount ?></span>
                                 </td>
                                 <td class="text-center fw-bold text-success">
                                     <?= number_format($order->total, 0, '', ' ') ?> ₽
@@ -74,12 +76,31 @@ $this->registerJsFile('@web/js/orders.js', ['depends' => [\yii\web\JqueryAsset::
                                        title="Просмотреть детали">
                                         <i class="fas fa-eye"></i>
                                     </a>
+                                    
+                                    <?php if ($order->canComplete()): ?>
+                                        <button class="btn btn-sm btn-success complete-order-btn"
+                                                data-order-id="<?= $order->order_id ?>"
+                                                data-order-number="<?= $order->order_id ?>"
+                                                title="Получить заказ">
+                                            <i class="fas fa-check"></i>
+                                        </button>
+                                    <?php endif; ?>
+                                    
                                     <?php if ($order->canCancel()): ?>
                                         <button class="btn btn-sm btn-outline-danger cancel-order-btn"
                                                 data-order-id="<?= $order->order_id ?>"
                                                 data-order-number="<?= $order->order_id ?>"
                                                 title="Отменить заказ">
                                             <i class="fas fa-times"></i>
+                                        </button>
+                                    <?php endif; ?>
+                                    
+                                    <?php if ($order->canDelete()): ?>
+                                        <button class="btn btn-sm btn-danger delete-order-btn"
+                                                data-order-id="<?= $order->order_id ?>"
+                                                data-order-number="<?= $order->order_id ?>"
+                                                title="Удалить заказ">
+                                            <i class="fas fa-trash"></i>
                                         </button>
                                     <?php endif; ?>
                                 </td>

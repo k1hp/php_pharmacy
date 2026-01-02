@@ -1,5 +1,5 @@
 <?php
-// controllers/OrderController.php
+// controllers/OrderController.php (добавляем метод complete)
 
 namespace app\controllers;
 
@@ -100,9 +100,8 @@ class OrderController extends Controller
             
             if ($order) {
                 Yii::$app->session->setFlash('success', 
-                    "Заказ #{$order->order_id} успешно оформлен! " .
-                    "Списано: " . number_format($order->total, 0, '', ' ') . " ₽. " .
-                    "Статус: " . $order->getStatusLabel()
+                    "Заказ #{$order->order_id} успешно оформлен и оплачен! " .
+                    "Списано: " . number_format($order->total, 0, '', ' ') . " ₽"
                 );
                 return $this->redirect(['order/view', 'id' => $order->order_id]);
             } else {
@@ -122,7 +121,6 @@ class OrderController extends Controller
             'profile' => $profile,
         ]);
     }
-
     /**
      * Просмотр деталей заказа
      */
@@ -177,7 +175,45 @@ class OrderController extends Controller
     }
 
     /**
-     * AJAX: Отмена заказа
+     * AJAX: Отметить заказ как полученный
+     */
+    public function actionComplete()
+    {
+        Yii::$app->response->format = Response::FORMAT_JSON;
+        
+        if (Yii::$app->user->isGuest) {
+            return ['success' => false, 'message' => 'Требуется авторизация'];
+        }
+        
+        $orderId = Yii::$app->request->post('id');
+        $order = Order::findOne($orderId);
+        
+        if (!$order) {
+            return ['success' => false, 'message' => 'Заказ не найден'];
+        }
+        
+        if ($order->profile_id != Yii::$app->user->identity->profile_id) {
+            return ['success' => false, 'message' => 'Доступ запрещен'];
+        }
+        
+        if (!$order->canComplete()) {
+            return ['success' => false, 'message' => 'Заказ нельзя отметить как полученный'];
+        }
+        
+        if ($order->markAsCompleted()) {
+            return [
+                'success' => true,
+                'message' => 'Заказ отмечен как полученный',
+                'newStatus' => $order->status,
+                'newStatusLabel' => $order->getStatusLabel(),
+            ];
+        } else {
+            return ['success' => false, 'message' => 'Ошибка при обновлении статуса'];
+        }
+    }
+
+    /**
+     * AJAX: Отмена заказа (только для оплаченных заказов)
      */
     public function actionCancel()
     {
@@ -199,7 +235,7 @@ class OrderController extends Controller
         }
         
         if (!$order->canCancel()) {
-            return ['success' => false, 'message' => 'Заказ уже обрабатывается и не может быть отменен'];
+            return ['success' => false, 'message' => 'Заказ уже получен или отменен'];
         }
         
         $transaction = Yii::$app->db->beginTransaction();
@@ -224,7 +260,7 @@ class OrderController extends Controller
                 }
             }
             
-            // 3. Меняем статус заказа
+            // 3. Меняем статус заказа на отменен
             $order->status = Order::STATUS_CANCELLED;
             if (!$order->save()) {
                 throw new \Exception('Не удалось обновить статус заказа');
@@ -243,6 +279,46 @@ class OrderController extends Controller
             $transaction->rollBack();
             Yii::error($e->getMessage());
             return ['success' => false, 'message' => 'Ошибка при отмене заказа'];
+        }
+    }
+    
+    /**
+     * AJAX: Удаление отмененного заказа
+     */
+    public function actionDelete()
+    {
+        Yii::$app->response->format = Response::FORMAT_JSON;
+        
+        if (Yii::$app->user->isGuest) {
+            return ['success' => false, 'message' => 'Требуется авторизация'];
+        }
+        
+        $orderId = Yii::$app->request->post('id');
+        $order = Order::findOne($orderId);
+        
+        if (!$order) {
+            return ['success' => false, 'message' => 'Заказ не найден'];
+        }
+        
+        if ($order->profile_id != Yii::$app->user->identity->profile_id) {
+            return ['success' => false, 'message' => 'Доступ запрещен'];
+        }
+        
+        if (!$order->canDelete()) {
+            return ['success' => false, 'message' => 'Можно удалить только отмененные заказы'];
+        }
+        
+        // Удаляем сначала товары заказа
+        OrderItem::deleteAll(['order_id' => $order->order_id]);
+        
+        // Затем удаляем сам заказ
+        if ($order->delete()) {
+            return [
+                'success' => true,
+                'message' => 'Заказ успешно удален',
+            ];
+        } else {
+            return ['success' => false, 'message' => 'Ошибка при удалении заказа'];
         }
     }
 }
