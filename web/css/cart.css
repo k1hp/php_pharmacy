@@ -1,0 +1,47 @@
+/* Анимации для корзины */
+.cart-item-row {
+    transition: all 0.3s ease;
+}
+
+.cart-item-row:hover {
+    background-color: rgba(0, 123, 255, 0.05);
+}
+
+.quantity-container {
+    min-width: 60px;
+}
+
+.btn-outline-secondary:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Иконка пустой корзины */
+.empty-cart-icon {
+    animation: float 3s ease-in-out infinite;
+}
+
+@keyframes float {
+    0%, 100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-10px);
+    }
+}
+
+/* Уведомления */
+.alert {
+    animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}

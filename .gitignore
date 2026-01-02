@@ -1,0 +1,101 @@
+# ДИРЕКТОРИИ
+/vendor/
+/runtime/*
+!/runtime/.gitkeep
+/web/assets/*
+!/web/assets/.gitkeep
+
+# КОНФИГУРАЦИОННЫЕ ФАЙЛЫ (чувствительные данные)
+/config/db.php
+/config/params-local.php
+/config/web-local.php
+/config/console-local.php
+.env
+.env.local
+.env.*.local
+*.local.php
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*.swn
+*.bak
+.DS_Store
+Thumbs.db
+
+# COMPOSER
+composer.phar
+composer.lock
+/composer.lock
+
+# TESTS
+/tests/_output/*
+/tests/_support/_generated/*
+.codeception
+.codeception.result.cache
+/tests/*.sqlite
+
+# ПАКЕТНЫЕ МЕНЕДЖЕРЫ
+/node_modules/
+/bower_components/
+/npm-debug.log
+/yarn-error.log
+
+# ДОКЕР
+docker-compose.override.yml
+.dockerignore
+
+# ВАГРАНТ
+.vagrant/
+vagrant-local.yml
+
+# ЗАГРУЗКИ ПОЛЬЗОВАТЕЛЕЙ
+/uploads/*
+!/uploads/.gitkeep
+/storage/*
+!/storage/.gitkeep
+
+# БЭКАПЫ
+*.backup
+*.bak
+*.old
+*.tmp
+
+# ЛОГИ
+*.log
+logs/
+/logs/*
+
+# PHP
+.phpunit.result.cache
+.php-cs-fixer.cache
+
+# ОПЕРАЦИОННЫЕ СИСТЕМЫ
+ehthumbs.db
+Icon?
+*.lnk
+
+# СЕССИИ
+/sessions/*
+
+# CACHE
+/cache/*
+!/cache/.gitkeep
+
+# ДОПОЛНИТЕЛЬНО ДЛЯ YII2
+/yii
+/yii.bat
+/requirements.php
+Vagrantfile
+vagrant/
+/codeception.yml
+
+# ПРОВЕРКА ПРАВ
+.permission-check
+
+# TEMP ФАЙЛЫ
+*.temp
+*.tmp
+~$*

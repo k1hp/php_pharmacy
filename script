@@ -1,0 +1,113 @@
+<?php
+use yii\helpers\Html;
+use yii\bootstrap5\Nav;
+use yii\bootstrap5\NavBar;
+use yii\widgets\Breadcrumbs;
+use app\assets\AppAsset;
+
+AppAsset::register($this);
+
+$this->registerCssFile('@web/css/pharmacy.css');
+$this->registerCssFile('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css');
+?>
+<?php $this->beginPage() ?>
+<!DOCTYPE html>
+<html lang="<?= Yii::$app->language ?>">
+<head>
+    <meta charset="<?= Yii::$app->charset ?>">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <?= Html::csrfMetaTags() ?>
+    <title><?= Html::encode($this->title) ?></title>
+    <?php $this->head() ?>
+</head>
+<body>
+<?php $this->beginBody() ?>
+
+<!-- Уведомления -->
+<div id="notifications" class="notification"></div>
+
+<!-- Навигация -->
+<nav class="navbar navbar-expand-lg navbar-pharmacy">
+    <div class="container">
+        <a class="navbar-brand" href="<?= Yii::$app->homeUrl ?>">
+            <i class="fas fa-pills me-2"></i>Аптека
+        </a>
+        
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent">
+            <i class="fas fa-bars text-white"></i>
+        </button>
+        
+        <div class="collapse navbar-collapse" id="navbarContent">
+            <?php
+            $menuItems = [
+                ['label' => 'Главная', 'url' => ['/site/index'], 'active' => $this->context->route == 'site/index'],
+                ['label' => 'Каталог', 'url' => ['/product/index'], 'active' => $this->context->route == 'product/index'],
+            ];
+            
+            if (Yii::$app->user->isGuest) {
+                $menuItems[] = ['label' => 'Вход', 'url' => ['/site/login']];
+                $menuItems[] = ['label' => 'Регистрация', 'url' => ['/site/signup']];
+            } else {
+                // Счетчик корзины
+                $cartCount = 0;
+                if ($cart = Yii::$app->user->identity->activeCart) {
+                    $cartCount = $cart->getCartItems()->sum('quantity') ?? 0;
+                }
+                
+                $menuItems[] = [
+                    'label' => 'Корзина <span class="cart-badge badge rounded-pill">' . $cartCount . '</span>',
+                    'url' => ['/cart/index'],
+                    'encode' => false,
+                    'active' => $this->context->route == 'cart/index'
+                ];
+                
+                $menuItems[] = '<li class="nav-item dropdown">'
+                    . Html::a(
+                        '<i class="fas fa-user me-1"></i>' . Html::encode(Yii::$app->user->identity->name),
+                        '#',
+                        [
+                            'class' => 'nav-link dropdown-toggle',
+                            'data-bs-toggle' => 'dropdown',
+                            'role' => 'button'
+                        ]
+                    )
+                    . '<ul class="dropdown-menu">'
+                    . '<li>' . Html::a('<i class="fas fa-history me-2"></i>История заказов', ['/order/history'], ['class' => 'dropdown-item']) . '</li>'
+                    . '<li><hr class="dropdown-divider"></li>'
+                    . '<li>' . Html::a('<i class="fas fa-wallet me-2"></i>Мой кошелек', ['#'], ['class' => 'dropdown-item']) . '</li>'
+                    . '<li><hr class="dropdown-divider"></li>'
+                    . '<li>'
+                    . Html::beginForm(['/site/logout'])
+                    . Html::submitButton(
+                        '<i class="fas fa-sign-out-alt me-2"></i>Выход',
+                        ['class' => 'dropdown-item border-0 bg-transparent']
+                    )
+                    . Html::endForm()
+                    . '</li>'
+                    . '</ul>'
+                    . '</li>';
+            }
+            
+            echo Nav::widget([
+                'options' => ['class' => 'navbar-nav ms-auto'],
+                'items' => $menuItems,
+            ]);
+            ?>
+        </div>
+    </div>
+</nav>
+
+<!-- Контент -->
+<main class="py-4">
+    <div class="container">
+        <?= $content ?>
+    </div>
+</main>
+<?php
+// Подключение JS
+$this->registerJsFile('@web/js/pharmacy.js', ['depends' => [yii\web\JqueryAsset::class]]);
+?>
+<?php $this->endBody() ?>
+</body>
+</html>
+<?php $this->endPage() ?>
