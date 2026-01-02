@@ -1,233 +1,236 @@
-<p align="center">
-    <a href="https://github.com/yiisoft" target="_blank">
-        <img src="https://avatars0.githubusercontent.com/u/993323" height="100px">
-    </a>
-    <h1 align="center">Yii 2 Basic Project Template</h1>
-    <br>
-</p>
+## Краткое руководство по запуску проекта
 
-Yii 2 Basic Project Template is a skeleton [Yii 2](https://www.yiiframework.com/) application best for
-rapidly creating small projects.
+#### 1. Склонируйте репозиторий
+---
+```
+git clone https://github.com/k1hp/php_pharmacy.git
+```
+либо другая ссылка, если проект переедет
 
-The template contains the basic features including user login/logout and a contact page.
-It includes all commonly used configurations that would allow you to focus on adding new
-features to your application.
-
-[![Latest Stable Version](https://img.shields.io/packagist/v/yiisoft/yii2-app-basic.svg)](https://packagist.org/packages/yiisoft/yii2-app-basic)
-[![Total Downloads](https://img.shields.io/packagist/dt/yiisoft/yii2-app-basic.svg)](https://packagist.org/packages/yiisoft/yii2-app-basic)
-[![build](https://github.com/yiisoft/yii2-app-basic/workflows/build/badge.svg)](https://github.com/yiisoft/yii2-app-basic/actions?query=workflow%3Abuild)
-
-DIRECTORY STRUCTURE
--------------------
-
-      assets/             contains assets definition
-      commands/           contains console commands (controllers)
-      config/             contains application configurations
-      controllers/        contains Web controller classes
-      mail/               contains view files for e-mails
-      models/             contains model classes
-      runtime/            contains files generated during runtime
-      tests/              contains various tests for the basic application
-      vendor/             contains dependent 3rd-party packages
-      views/              contains view files for the Web application
-      web/                contains the entry script and Web resources
-
-
-
-REQUIREMENTS
-------------
-
-The minimum requirement by this project template that your Web server supports PHP 7.4.
-
-
-INSTALLATION
-------------
-
-### Install via Composer
-
-If you do not have [Composer](https://getcomposer.org/), you may install it by following the instructions
-at [getcomposer.org](https://getcomposer.org/doc/00-intro.md#installation-nix).
-
-You can then install this project template using the following command:
-
-~~~
-composer create-project --prefer-dist yiisoft/yii2-app-basic basic
-~~~
-
-Now you should be able to access the application through the following URL, assuming `basic` is the directory
-directly under the Web root.
-
-~~~
-http://localhost/basic/web/
-~~~
-
-### Install from an Archive File
-
-Extract the archive file downloaded from [yiiframework.com](https://www.yiiframework.com/download/) to
-a directory named `basic` that is directly under the Web root.
-
-Set cookie validation key in `config/web.php` file to some random secret string:
-
-```php
-'request' => [
-    // !!! insert a secret key in the following (if it is empty) - this is required by cookie validation
-    'cookieValidationKey' => '<secret random string goes here>',
-],
+#### 2. Запуск проекта осуществляется через docker compose
+---
+- перейдите в корень проекта (там вы сможете найти файл docker-compose.yml)
+- запустите
+```
+docker compose up --build
 ```
 
-You can then access the application through the following URL:
-
-~~~
-http://localhost/basic/web/
-~~~
-
-
-### Install with Docker
-
-Update your vendor packages
-
-    docker-compose run --rm php composer update --prefer-dist
-    
-Run the installation triggers (creating cookie validation code)
-
-    docker-compose run --rm php composer install    
-    
-Start the container
-
-    docker-compose up -d
-    
-You can then access the application through the following URL:
-
-    http://127.0.0.1:8000
-
-**NOTES:** 
-- Minimum required Docker engine version `17.04` for development (see [Performance tuning for volume mounts](https://docs.docker.com/docker-for-mac/osxfs-caching/))
-- The default configuration uses a host-volume in your home directory `.docker-composer` for composer caches
-
-
-CONFIGURATION
--------------
-
-### Database
-
-Edit the file `config/db.php` with real data, for example:
-
-```php
-return [
-    'class' => 'yii\db\Connection',
-    'dsn' => 'mysql:host=localhost;dbname=yii2basic',
-    'username' => 'root',
-    'password' => '1234',
-    'charset' => 'utf8',
-];
+P.S.
+Сначала возможно ругательство из-за отсутствия .lock файла
+Логи будут примерно такие 
+```
+Attaching to apteka_db, php-1
+apteka_db  |
+apteka_db  | PostgreSQL Database directory appears to contain a database; Skipping initialization
+apteka_db  |
+apteka_db  | 2026-01-02 19:07:49.998 UTC [1] LOG:  starting PostgreSQL 15.15 (Debian 15.15-1.pgdg13+1) on x86_64-pc-linux-gnu, compiled by gcc (Debian 14.2.0-19) 14.2.0, 64-bit
+apteka_db  | 2026-01-02 19:07:49.999 UTC [1] LOG:  listening on IPv4 address "0.0.0.0", port 5432
+apteka_db  | 2026-01-02 19:07:49.999 UTC [1] LOG:  listening on IPv6 address "::", port 5432
+apteka_db  | 2026-01-02 19:07:50.003 UTC [1] LOG:  listening on Unix socket "/var/run/postgresql/.s.PGSQL.5432"
+apteka_db  | 2026-01-02 19:07:50.008 UTC [29] LOG:  database system was shut down at 2026-01-02 19:06:56 UTC
+apteka_db  | 2026-01-02 19:07:50.017 UTC [1] LOG:  database system is ready to accept connections
+php-1      | Switching uid for 'www-data' to 33
+php-1      | usermod: no changes
+php-1      | The repository at "/app" does not have the correct ownership and git refuses to use it:
+php-1      |
+php-1      | fatal: detected dubious ownership in repository at '/app'
+php-1      | To add an exception for this directory, call:
+php-1      |
+php-1      |    git config --global --add safe.directory /app
+php-1      |
+php-1      | No composer.lock file present. Updating dependencies to latest instead of installing from lock file. See https://getcomposer.org/install for more information.
+php-1      | Loading composer repositories with package information
+php-1      | https://repo.packagist.org could not be fully loaded (curl error 28 while downloading https://repo.packagist.org/packages.json: Connection timed out after 10003 milliseconds), package information was loaded from the local cache and may be out of date
+php-1      | A connection timeout was encountered. If you intend to run Composer without connecting to the internet, run the command again prefixed with COMPOSER_DISABLE_NETWORK=1 to make Composer run in offline mode.
+```
+В этом случае вам необходимо подождать 1-2 минуты и появятся логи установки, дождитесь пожалуйста.
+```
+php-1      | Updating dependencies
+php-1      | Lock file operations: 80 installs, 0 updates, 0 removals
+php-1      |   - Locking behat/gherkin (v4.16.1)
+php-1      |   - Locking bower-asset/inputmask (5.0.9)
+php-1      |   - Locking bower-asset/jquery (3.7.1)
+php-1      |   - Locking bower-asset/punycode (v1.4.1)
+php-1      |   - Locking bower-asset/yii2-pjax (2.0.8)
+php-1      |   - Locking cebe/markdown (1.2.1)
+php-1      |   - Locking codeception/codeception (5.3.3)
+php-1      |   - Locking codeception/lib-asserts (3.1.0)
+php-1      |   - Locking codeception/lib-innerbrowser (4.0.8)
+php-1      |   - Locking codeception/lib-web (2.0.1)
+php-1      |   - Locking codeception/module-asserts (3.3.0)
+php-1      |   - Locking codeception/module-filesystem (3.0.2)
+php-1      |   - Locking codeception/module-yii2 (1.1.12)
+php-1      |   - Locking codeception/stub (4.2.1)
+php-1      |   - Locking codeception/verify (3.3.0)
+php-1      |   - Locking doctrine/lexer (3.0.1)
+php-1      |   - Locking egulias/email-validator (4.0.4)
+php-1      |   - Locking ezyang/htmlpurifier (v4.19.0)
+php-1      |   - Locking fakerphp/faker (v1.24.1)
+php-1      |   - Locking guzzlehttp/psr7 (2.8.0)
+php-1      |   - Locking myclabs/deep-copy (1.13.4)
+php-1      |   - Locking nikic/php-parser (v5.7.0)
+php-1      |   - Locking phar-io/manifest (2.0.4)
+php-1      |   - Locking phar-io/version (3.2.1)
+php-1      |   - Locking phpspec/php-diff (v1.1.3)
+php-1      |   - Locking phpunit/php-code-coverage (12.5.2)
+php-1      |   - Locking phpunit/php-file-iterator (6.0.0)
+php-1      |   - Locking phpunit/php-invoker (6.0.0)
+php-1      |   - Locking phpunit/php-text-template (5.0.0)
+php-1      |   - Locking phpunit/php-timer (8.0.0)
+php-1      |   - Locking phpunit/phpunit (12.5.4)
+php-1      |   - Locking psr/container (2.0.2)
+php-1      |   - Locking psr/event-dispatcher (1.0.0)
+php-1      |   - Locking psr/http-factory (1.1.0)
+php-1      |   - Locking psr/http-message (2.0)
+php-1      |   - Locking psr/log (3.0.2)
+php-1      |   - Locking psy/psysh (v0.12.18)
+php-1      |   - Locking ralouphie/getallheaders (3.0.3)
+php-1      |   - Locking sebastian/cli-parser (4.2.0)
+php-1      |   - Locking sebastian/comparator (7.1.3)
+php-1      |   - Locking sebastian/complexity (5.0.0)
+php-1      |   - Locking sebastian/diff (7.0.0)
+php-1      |   - Locking sebastian/environment (8.0.3)
+php-1      |   - Locking sebastian/exporter (7.0.2)
+php-1      |   - Locking sebastian/global-state (8.0.2)
+php-1      |   - Locking sebastian/lines-of-code (4.0.0)
+php-1      |   - Locking sebastian/object-enumerator (7.0.0)
+php-1      |   - Locking sebastian/object-reflector (5.0.0)
+php-1      |   - Locking sebastian/recursion-context (7.0.1)
+php-1      |   - Locking sebastian/type (6.0.3)
+php-1      |   - Locking sebastian/version (6.0.0)
+php-1      |   - Locking staabm/side-effects-detector (1.0.5)
+php-1      |   - Locking symfony/browser-kit (v8.0.3)
+php-1      |   - Locking symfony/console (v8.0.3)
+php-1      |   - Locking symfony/css-selector (v8.0.0)
+php-1      |   - Locking symfony/deprecation-contracts (v3.6.0)
+php-1      |   - Locking symfony/dom-crawler (v8.0.1)
+php-1      |   - Locking symfony/event-dispatcher (v8.0.0)
+php-1      |   - Locking symfony/event-dispatcher-contracts (v3.6.0)
+php-1      |   - Locking symfony/finder (v8.0.3)
+php-1      |   - Locking symfony/mailer (v8.0.3)
+php-1      |   - Locking symfony/mime (v8.0.0)
+php-1      |   - Locking symfony/polyfill-ctype (v1.33.0)
+php-1      |   - Locking symfony/polyfill-intl-grapheme (v1.33.0)
+php-1      |   - Locking symfony/polyfill-intl-idn (v1.33.0)
+php-1      |   - Locking symfony/polyfill-intl-normalizer (v1.33.0)
+php-1      |   - Locking symfony/polyfill-mbstring (v1.33.0)
+php-1      |   - Locking symfony/service-contracts (v3.6.1)
+php-1      |   - Locking symfony/string (v8.0.1)
+php-1      |   - Locking symfony/var-dumper (v8.0.3)
+php-1      |   - Locking symfony/yaml (v8.0.1)
+php-1      |   - Locking theseer/tokenizer (2.0.1)
+php-1      |   - Locking twbs/bootstrap (v5.3.8)
+php-1      |   - Locking yiisoft/yii2 (2.0.53)
+php-1      |   - Locking yiisoft/yii2-bootstrap5 (2.0.51)
+php-1      |   - Locking yiisoft/yii2-composer (2.0.11)
+php-1      |   - Locking yiisoft/yii2-debug (2.1.27)
+php-1      |   - Locking yiisoft/yii2-faker (2.0.5)
+php-1      |   - Locking yiisoft/yii2-gii (2.2.7)
+php-1      |   - Locking yiisoft/yii2-symfonymailer (2.0.4)
+php-1      | Writing lock file
+php-1      | Installing dependencies from lock file (including require-dev)
+php-1      | Package operations: 80 installs, 0 updates, 0 removals
+php-1      |     0 [>---------------------------]    0 [->--------------------------]
+php-1      |   - Installing yiisoft/yii2-composer (2.0.11): Extracting archive
+php-1      |   - Installing behat/gherkin (v4.16.1): Extracting archive
+php-1      |   - Installing bower-asset/jquery (3.7.1): Extracting archive
+php-1      |   - Installing bower-asset/inputmask (5.0.9): Extracting archive
+php-1      |   - Installing bower-asset/punycode (v1.4.1): Extracting archive
+php-1      |   - Installing bower-asset/yii2-pjax (2.0.8): Extracting archive
+php-1      |   - Installing cebe/markdown (1.2.1): Extracting archive
+php-1      |   - Installing symfony/css-selector (v8.0.0): Extracting archive
+php-1      |   - Installing staabm/side-effects-detector (1.0.5): Extracting archive
+php-1      |   - Installing sebastian/version (6.0.0): Extracting archive
+php-1      |   - Installing sebastian/type (6.0.3): Extracting archive
+php-1      |   - Installing sebastian/recursion-context (7.0.1): Extracting archive
+php-1      |   - Installing sebastian/object-reflector (5.0.0): Extracting archive
+php-1      |   - Installing sebastian/object-enumerator (7.0.0): Extracting archive
+php-1      |   - Installing sebastian/global-state (8.0.2): Extracting archive
+php-1      |   - Installing symfony/polyfill-mbstring (v1.33.0): Extracting archive
+php-1      |   - Installing sebastian/exporter (7.0.2): Extracting archive
+php-1      |   - Installing sebastian/environment (8.0.3): Extracting archive
+php-1      |   - Installing sebastian/diff (7.0.0): Extracting archive
+php-1      |   - Installing sebastian/comparator (7.1.3): Extracting archive
+php-1      |   - Installing sebastian/cli-parser (4.2.0): Extracting archive
+php-1      |   - Installing phpunit/php-timer (8.0.0): Extracting archive
+php-1      |   - Installing phpunit/php-text-template (5.0.0): Extracting archive
+php-1      |   - Installing phpunit/php-invoker (6.0.0): Extracting archive
+php-1      |   - Installing phpunit/php-file-iterator (6.0.0): Extracting archive
+php-1      |   - Installing theseer/tokenizer (2.0.1): Extracting archive
+php-1      |   - Installing symfony/polyfill-ctype (v1.33.0): Extracting archive
+php-1      |   - Installing nikic/php-parser (v5.7.0): Extracting archive
+php-1      |   - Installing sebastian/lines-of-code (4.0.0): Extracting archive
+php-1      |   - Installing sebastian/complexity (5.0.0): Extracting archive
+php-1      |   - Installing phpunit/php-code-coverage (12.5.2): Extracting archive
+php-1      |   - Installing phar-io/version (3.2.1): Extracting archive
+php-1      |   - Installing phar-io/manifest (2.0.4): Extracting archive
+php-1      |   - Installing myclabs/deep-copy (1.13.4): Extracting archive
+php-1      |   - Installing phpunit/phpunit (12.5.4): Extracting archive
+php-1      |   - Installing ralouphie/getallheaders (3.0.3): Extracting archive
+php-1      |   - Installing psr/http-message (2.0): Extracting archive
+php-1      |   - Installing psr/http-factory (1.1.0): Extracting archive
+php-1      |   - Installing guzzlehttp/psr7 (2.8.0): Extracting archive
+php-1      |   - Installing codeception/lib-web (2.0.1): Extracting archive
+php-1      |   - Installing codeception/lib-asserts (3.1.0): Extracting archive
+php-1      |   - Installing symfony/yaml (v8.0.1): Extracting archive
+php-1      |   - Installing symfony/var-dumper (v8.0.3): Extracting archive
+php-1      |   - Installing symfony/finder (v8.0.3): Extracting archive
+php-1      |   - Installing psr/event-dispatcher (1.0.0): Extracting archive
+php-1      |   - Installing symfony/event-dispatcher-contracts (v3.6.0): Extracting archive
+php-1      |   - Installing symfony/event-dispatcher (v8.0.0): Extracting archive
+php-1      |   - Installing symfony/polyfill-intl-normalizer (v1.33.0): Extracting archive
+php-1      |   - Installing symfony/polyfill-intl-grapheme (v1.33.0): Extracting archive
+php-1      |   - Installing symfony/string (v8.0.1): Extracting archive
+php-1      |   - Installing symfony/deprecation-contracts (v3.6.0): Extracting archive
+php-1      |   - Installing psr/container (2.0.2): Extracting archive
+php-1      |   - Installing symfony/service-contracts (v3.6.1): Extracting archive
+php-1      |   - Installing symfony/console (v8.0.3): Extracting archive
+php-1      |   - Installing psy/psysh (v0.12.18): Extracting archive
+php-1      |   - Installing codeception/stub (4.2.1): Extracting archive
+php-1      |   - Installing codeception/codeception (5.3.3): Extracting archive
+php-1      |   - Installing codeception/module-asserts (3.3.0): Extracting archive
+php-1      |   - Installing codeception/module-filesystem (3.0.2): Extracting archive
+php-1      |   - Installing symfony/dom-crawler (v8.0.1): Extracting archive
+php-1      |   - Installing symfony/browser-kit (v8.0.3): Extracting archive
+php-1      |   - Installing codeception/lib-innerbrowser (4.0.8): Extracting archive
+php-1      |   - Installing codeception/module-yii2 (1.1.12): Extracting archive
+php-1      |   - Installing codeception/verify (3.3.0): Extracting archive
+php-1      |   - Installing symfony/polyfill-intl-idn (v1.33.0): Extracting archive
+php-1      |   - Installing doctrine/lexer (3.0.1): Extracting archive
+php-1      |   - Installing egulias/email-validator (4.0.4): Extracting archive
+php-1      |   - Installing ezyang/htmlpurifier (v4.19.0): Extracting archive
+php-1      |   - Installing psr/log (3.0.2): Extracting archive
+php-1      |   - Installing symfony/mime (v8.0.0): Extracting archive
+php-1      |   - Installing yiisoft/yii2 (2.0.53): Extracting archive
+php-1      |   - Installing twbs/bootstrap (v5.3.8): Extracting archive
+php-1      |   - Installing yiisoft/yii2-bootstrap5 (2.0.51): Extracting archive
+php-1      |   - Installing yiisoft/yii2-debug (2.1.27): Extracting archive
+php-1      |   - Installing fakerphp/faker (v1.24.1): Extracting archive
+php-1      |   - Installing yiisoft/yii2-faker (2.0.5): Extracting archive
+php-1      |   - Installing phpspec/php-diff (v1.1.3): Extracting archive
+php-1      |   - Installing yiisoft/yii2-gii (2.2.7): Extracting archive
+php-1      |   - Installing symfony/mailer (v8.0.3): Extracting archive
+php-1      |   - Installing yiisoft/yii2-symfonymailer (2.0.4): Extracting archive
+php-1      |   0/79 [>---------------------------]   0%
+php-1      |  36/79 [============>---------------]  45%
+php-1      |  57/79 [====================>-------]  72%
+php-1      |  74/79 [==========================>-]  93%
+php-1      |  79/79 [============================] 100%
+php-1      | 13 package suggestions were added by new dependencies, use `composer suggest` to see details.
+php-1      | Generating autoload files
+php-1      | 54 packages you are using are looking for funding.
+php-1      | Use the `composer fund` command to find out more!
+php-1      | Yii Migration Tool (based on Yii v2.0.53)
+php-1      |
+php-1      | No new migrations found. Your system is up-to-date.
+php-1      | AH00558: apache2: Could not reliably determine the server's fully qualified domain name, using 172.18.0.3. Set the 'ServerName' directive globally to suppress this message
+php-1      | AH00558: apache2: Could not reliably determine the server's fully qualified domain name, using 172.18.0.3. Set the 'ServerName' directive globally to suppress this message
+php-1      | [Fri Jan 02 19:10:38.416286 2026] [mpm_prefork:notice] [pid 198:tid 198] AH00163: Apache/2.4.65 (Debian) configured -- resuming normal operations
+php-1      | [Fri Jan 02 19:10:38.416366 2026] [core:notice] [pid 198:tid 198] AH00094: Command line: 'apache2 -D FOREGROUND'
 ```
 
-**NOTES:**
-- Yii won't create the database for you, this has to be done manually before you can access it.
-- Check and edit the other files in the `config/` directory to customize your application as required.
-- Refer to the README in the `tests` directory for information specific to basic application tests.
-
-
-TESTING
--------
-
-Tests are located in `tests` directory. They are developed with [Codeception PHP Testing Framework](https://codeception.com/).
-By default, there are 3 test suites:
-
-- `unit`
-- `functional`
-- `acceptance`
-
-Tests can be executed by running
-
+#### 3. Можете потрогать проект по следующему адресу  
+---
 ```
-vendor/bin/codecept run
+http://localhost:8000
 ```
-
-The command above will execute unit and functional tests. Unit tests are testing the system components, while functional
-tests are for testing user interaction. Acceptance tests are disabled by default as they require additional setup since
-they perform testing in real browser. 
-
-
-### Running  acceptance tests
-
-To execute acceptance tests do the following:  
-
-1. Rename `tests/acceptance.suite.yml.example` to `tests/acceptance.suite.yml` to enable suite configuration
-
-2. Replace `codeception/base` package in `composer.json` with `codeception/codeception` to install full-featured
-   version of Codeception
-
-3. Update dependencies with Composer 
-
-    ```
-    composer update  
-    ```
-
-4. Download [Selenium Server](https://www.seleniumhq.org/download/) and launch it:
-
-    ```
-    java -jar ~/selenium-server-standalone-x.xx.x.jar
-    ```
-
-    In case of using Selenium Server 3.0 with Firefox browser since v48 or Google Chrome since v53 you must download [GeckoDriver](https://github.com/mozilla/geckodriver/releases) or [ChromeDriver](https://sites.google.com/a/chromium.org/chromedriver/downloads) and launch Selenium with it:
-
-    ```
-    # for Firefox
-    java -jar -Dwebdriver.gecko.driver=~/geckodriver ~/selenium-server-standalone-3.xx.x.jar
-    
-    # for Google Chrome
-    java -jar -Dwebdriver.chrome.driver=~/chromedriver ~/selenium-server-standalone-3.xx.x.jar
-    ``` 
-    
-    As an alternative way you can use already configured Docker container with older versions of Selenium and Firefox:
-    
-    ```
-    docker run --net=host selenium/standalone-firefox:2.53.0
-    ```
-
-5. (Optional) Create `yii2basic_test` database and update it by applying migrations if you have them.
-
-   ```
-   tests/bin/yii migrate
-   ```
-
-   The database configuration can be found at `config/test_db.php`.
-
-
-6. Start web server:
-
-    ```
-    tests/bin/yii serve
-    ```
-
-7. Now you can run all available tests
-
-   ```
-   # run all available tests
-   vendor/bin/codecept run
-
-   # run acceptance tests
-   vendor/bin/codecept run acceptance
-
-   # run only unit and functional tests
-   vendor/bin/codecept run unit,functional
-   ```
-
-### Code coverage support
-
-By default, code coverage is disabled in `codeception.yml` configuration file, you should uncomment needed rows to be able
-to collect code coverage. You can run your tests and collect coverage with the following command:
-
-```
-#collect coverage for all tests
-vendor/bin/codecept run --coverage --coverage-html --coverage-xml
-
-#collect coverage only for unit tests
-vendor/bin/codecept run unit --coverage --coverage-html --coverage-xml
-
-#collect coverage for unit and functional tests
-vendor/bin/codecept run functional,unit --coverage --coverage-html --coverage-xml
-```
-
-You can see code coverage output under the `tests/_output` directory.
