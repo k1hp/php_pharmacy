@@ -1,3 +1,9 @@
+# Проект Аптека
+
+* [Перейти к руководству](#Краткое-руководство-по-запуску-проекта)
+* [Перейти к скриншотам](#Скриншоты-проекта)
+
+
 ## Краткое руководство по запуску проекта
 
 #### 1. Склонируйте репозиторий
@@ -234,3 +240,17 @@ php-1      | [Fri Jan 02 19:10:38.416366 2026] [core:notice] [pid 198:tid 198] A
 ```
 http://localhost:8000
 ```
+
+## Скриншоты проекта 
+---
+<img width="2477" height="1316" alt="image" src="https://github.com/user-attachments/assets/2745cb13-6474-406f-8285-d54a24f48d63" />
+<img width="2477" height="1316" alt="image" src="https://github.com/user-attachments/assets/e36939a4-2dac-4579-b8aa-ec8f280fda63" />
+<img width="2477" height="1316" alt="image" src="https://github.com/user-attachments/assets/9f7057c8-bfd3-41e7-adcc-f36692bfb591" />
+<img width="2477" height="1316" alt="image" src="https://github.com/user-attachments/assets/020e3b19-9e09-459e-9d10-edac6e61d911" />
+<img width="2477" height="1316" alt="image" src="https://github.com/user-attachments/assets/8b63a6a2-bd4f-4b3f-9d88-06b25f4506d6" />
+<img width="2477" height="1316" alt="image" src="https://github.com/user-attachments/assets/6f48b785-7a30-4730-8bc8-d99a7ddf8f5a" />
+<img width="2477" height="1316" alt="image" src="https://github.com/user-attachments/assets/a87de050-d39c-4858-8a74-a209a10abf0e" />
+<img width="2477" height="1316" alt="image" src="https://github.com/user-attachments/assets/5445fe1f-b8e5-4529-a4ba-2c52fa5ed884" />
+
+
+
