@@ -1,4 +1,4 @@
-// notifications.js - ОБЩИЕ функции для ВСЕХ страниц
+// notifications.js - общие уведомления
 function showNotification(message, type = 'info') {
     const alertClass = {
         'success': 'alert-success',

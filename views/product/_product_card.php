@@ -2,7 +2,6 @@
 use yii\helpers\Html;
 use yii\helpers\Url;
 
-/** @var \app\models\Product $model */
 
 $stockClass = $model->stock > 10 ? 'stock-in' : ($model->stock > 0 ? 'stock-low' : 'stock-out');
 $stockText = $model->stock > 10 ? 'В наличии' : ($model->stock > 0 ? 'Мало осталось' : 'Нет в наличии');

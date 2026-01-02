@@ -140,13 +140,12 @@ $this->registerCssFile('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.
 </main>
 
 <?php
-// Bootstrap 5 JS ПЕРВЫМ, но после jQuery (jQuery подключается через AppAsset)
+// Bootstrap 5 JS, потом jQuery (jQuery подключается через AppAsset)
 $this->registerJsFile('https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js', [
-    'depends' => [yii\web\JqueryAsset::class], // Важно: зависит от jQuery
+    'depends' => [yii\web\JqueryAsset::class],
     'position' => \yii\web\View::POS_END
 ]);
 
-// Затем ваши скрипты
 $this->registerJsFile('@web/js/notifications.js', [
     'depends' => [yii\web\JqueryAsset::class],
     'position' => \yii\web\View::POS_END

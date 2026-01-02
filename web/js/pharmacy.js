@@ -1,4 +1,4 @@
-// pharmacy.js - ТОЛЬКО для страницы КАТАЛОГА (/product/index)
+// pharmacy.js - only (/product/index)
 $(document).ready(function() {
     console.log('pharmacy.js загружен - КАТАЛОГ');
     

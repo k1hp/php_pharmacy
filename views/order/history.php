@@ -1,5 +1,4 @@
 <?php
-// views/order/history.php
 
 use yii\helpers\Html;
 use yii\helpers\Url;

@@ -1,5 +1,4 @@
 <?php
-// models/ProductSearch.php
 
 namespace app\models;
 
@@ -87,9 +86,7 @@ class ProductSearch extends Product
                 case 'name_desc':
                     $query->orderBy(['title' => SORT_DESC]);
                     break;
-                // case 'new': // УБИРАЕМ - нет поля created_at
-                //     $query->orderBy(['product_id' => SORT_DESC]);
-                //     break;
+                
             }
         }
 

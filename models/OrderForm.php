@@ -1,6 +1,4 @@
 <?php
-// models/OrderForm.php (обновляем создание заказа)
-
 namespace app\models;
 
 use Yii;
@@ -11,9 +9,7 @@ class OrderForm extends Model
     public $delivery_address;
     public $agree_terms = true;
 
-    /**
-     * {@inheritdoc}
-     */
+ 
     public function rules()
     {
         return [
@@ -24,9 +20,7 @@ class OrderForm extends Model
         ];
     }
 
-    /**
-     * {@inheritdoc}
-     */
+    
     public function attributeLabels()
     {
         return [

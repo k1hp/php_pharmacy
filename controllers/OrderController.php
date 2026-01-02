@@ -1,5 +1,4 @@
 <?php
-// controllers/OrderController.php (добавляем метод complete)
 
 namespace app\controllers;
 

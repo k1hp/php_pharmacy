@@ -1,4 +1,4 @@
-// cart.js - ТОЛЬКО для страницы КОРЗИНЫ (/cart/index)
+// cart.js - only (/cart/index)
 $(document).ready(function() {
     console.log('cart.js загружен - КОРЗИНА');
     

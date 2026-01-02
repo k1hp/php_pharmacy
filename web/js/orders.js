@@ -1,4 +1,3 @@
-// web/js/orders.js (обновляем URL)
 
 $(document).ready(function() {
     console.log('Orders JS loaded');

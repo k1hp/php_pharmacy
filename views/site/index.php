@@ -5,7 +5,7 @@ use yii\helpers\Url;
 $this->title = 'Аптека';
 ?>
 
-<!-- Герой секция -->
+<!-- Main секция -->
 <section class="hero-section py-5 mb-5">
     <div class="container">
         <div class="row align-items-center">

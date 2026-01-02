@@ -57,7 +57,7 @@ public function safeUp()
             'CASCADE'
         );
 
-        // Уникальный индекс для активной корзины (PostgreSQL синтаксис)
+        // Уникальный индекс для активной корзины
         $this->execute("
             CREATE UNIQUE INDEX unique_active_cart_per_profile 
             ON carts (profile_id) 
@@ -151,7 +151,7 @@ public function safeUp()
     }
 
     /**
-     * {@inheritdoc}
+     * safeDown
      */
     public function safeDown()
     {

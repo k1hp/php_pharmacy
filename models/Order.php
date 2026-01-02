@@ -1,42 +1,21 @@
 <?php
-// models/Order.php
 
 namespace app\models;
 
 use Yii;
 
-/**
- * This is the model class for table "orders".
- *
- * @property int $order_id
- * @property int $profile_id
- * @property int $cart_id
- * @property int $total
- * @property string $status
- * @property string|null $delivery_address
- * @property string $created_at
- *
- * @property Cart $cart
- * @property Profile $profile
- * @property OrderItem[] $orderItems
- */
+
 class Order extends \yii\db\ActiveRecord
 {
     const STATUS_PAID = 'paid';           // Оплачен
     const STATUS_COMPLETED = 'completed'; // Получен
     const STATUS_CANCELLED = 'cancelled'; // Отменен
 
-    /**
-     * {@inheritdoc}
-     */
     public static function tableName()
     {
         return 'orders';
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function rules()
     {
         return [
@@ -57,9 +36,7 @@ class Order extends \yii\db\ActiveRecord
         ];
     }
 
-    /**
-     * {@inheritdoc}
-     */
+ 
     public function attributeLabels()
     {
         return [
